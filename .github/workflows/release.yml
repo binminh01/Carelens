@@ -50,19 +50,22 @@ jobs:
           flutter clean
           flutter pub get
 
-      # Khắc phục lỗi Namespace & compileSdk cho Isar trên GitHub Actions Runner
-      - name: Fix Isar Namespace for AGP Compatibility
+      # Sửa triệt để cả Lỗi Namespace và Lỗi compileSdk 30 của Isar
+      - name: Fix Isar Namespace and compileSdk for AGP Compatibility
         run: |
           ISAR_GRADLE="$HOME/.pub-cache/hosted/pub.dev/isar_flutter_libs-3.1.0+1/android/build.gradle"
           if [ -f "$ISAR_GRADLE" ]; then
+            # Bổ sung namespace nếu thiếu
             sed -i 's/android {/android {\n    namespace "dev.isar.isar_flutter_libs"/' "$ISAR_GRADLE"
+            # Ép compileSdkVersion lên 34 thay vì 30
+            sed -i 's/compileSdkVersion 30/compileSdkVersion 34/' "$ISAR_GRADLE"
           fi
 
       - name: Build Android Release APKs
         run: |
           flutter build apk --release --split-per-abi
 
-      # Lưu trữ APK Artifacts cho lượt Push thông thường (Không tạo Tag)
+      # Lưu trữ APK Artifacts cho lượt Push thông thường (Non-Tag Runs)
       - name: Upload APK Artifacts (Non-Tag Runs)
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/upload-artifact@v4
