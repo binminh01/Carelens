@@ -10,6 +10,11 @@ import '../constants/app_constants.dart';
 import '../models/prescription.dart';
 import 'isar_service.dart';
 
+/// Extension to provide .id alias for TimezoneInfo.identifier (flutter_timezone v5+)
+extension TimezoneInfoIdExtension on TimezoneInfo {
+  String get id => identifier;
+}
+
 /// Dịch vụ thông báo và báo thức nhắc nhở uống thuốc cục bộ (Hoạt động hoàn toàn Offline)
 class NotificationService {
   NotificationService._();
@@ -33,7 +38,8 @@ class NotificationService {
       // 1. Khởi tạo cơ sở dữ liệu múi giờ Timezone từ thiết bị thực tế
       tz.initializeTimeZones();
       try {
-        final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+        final String currentTimeZone =
+            (await FlutterTimezone.getLocalTimezone()).id;
         tz.setLocalLocation(tz.getLocation(currentTimeZone));
         developer.log(
           'Đã thiết lập múi giờ thành công: $currentTimeZone',
@@ -71,7 +77,7 @@ class NotificationService {
       );
 
       await _plugin.initialize(
-        initSettings,
+        settings: initSettings,
         onDidReceiveNotificationResponse: _onNotificationTap,
       );
 
@@ -265,14 +271,13 @@ class NotificationService {
       // 5. Lên lịch thông báo lặp lại hàng ngày (kèm cơ chế tự động fallback)
       try {
         await _plugin.zonedSchedule(
-          prescription.id,
-          '⏰ Đã đến giờ uống thuốc!',
-          'Vui lòng uống ${prescription.medicineName} - Liều lượng: ${prescription.dosage}',
-          scheduledDate,
-          details,
+          id: prescription.id,
+          title: '⏰ Đã đến giờ uống thuốc!',
+          body:
+              'Vui lòng uống ${prescription.medicineName} - Liều lượng: ${prescription.dosage}',
+          scheduledDate: scheduledDate,
+          notificationDetails: details,
           androidScheduleMode: scheduleMode,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
           payload: 'prescription_${prescription.id}',
         );
@@ -282,14 +287,13 @@ class NotificationService {
           name: 'NotificationService',
         );
         await _plugin.zonedSchedule(
-          prescription.id,
-          '⏰ Đã đến giờ uống thuốc!',
-          'Vui lòng uống ${prescription.medicineName} - Liều lượng: ${prescription.dosage}',
-          scheduledDate,
-          details,
+          id: prescription.id,
+          title: '⏰ Đã đến giờ uống thuốc!',
+          body:
+              'Vui lòng uống ${prescription.medicineName} - Liều lượng: ${prescription.dosage}',
+          scheduledDate: scheduledDate,
+          notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           matchDateTimeComponents: DateTimeComponents.time,
           payload: 'prescription_${prescription.id}',
         );
@@ -314,7 +318,7 @@ class NotificationService {
   /// Hủy thông báo theo ID đơn thuốc
   Future<void> cancelReminder(int prescriptionId) async {
     try {
-      await _plugin.cancel(prescriptionId);
+      await _plugin.cancel(id: prescriptionId);
       developer.log(
         'Đã hủy thông báo nhắc thuốc ID: $prescriptionId',
         name: 'NotificationService.cancelReminder',
@@ -386,10 +390,10 @@ class NotificationService {
 
     if (delaySeconds <= 0) {
       await _plugin.show(
-        999999,
-        '🔔 Kiểm tra thông báo CareLens',
-        'Hệ thống thông báo CareLens đang hoạt động tốt!',
-        details,
+        id: 999999,
+        title: '🔔 Kiểm tra thông báo CareLens',
+        body: 'Hệ thống thông báo CareLens đang hoạt động tốt!',
+        notificationDetails: details,
         payload: 'test_notification',
       );
     } else {
@@ -408,24 +412,22 @@ class NotificationService {
 
       try {
         await _plugin.zonedSchedule(
-          999999,
-          '🔔 Kiểm tra thông báo CareLens',
-          'Hệ thống thông báo CareLens đang hoạt động tốt!',
-          scheduledDate,
-          details,
+          id: 999999,
+          title: '🔔 Kiểm tra thông báo CareLens',
+          body: 'Hệ thống thông báo CareLens đang hoạt động tốt!',
+          scheduledDate: scheduledDate,
+          notificationDetails: details,
           androidScheduleMode: scheduleMode,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
           payload: 'test_notification',
         );
       } catch (_) {
         // Fallback gửi thông báo trực tiếp sau delay
         await Future.delayed(Duration(seconds: delaySeconds));
         await _plugin.show(
-          999999,
-          '🔔 Kiểm tra thông báo CareLens',
-          'Hệ thống thông báo CareLens đang hoạt động tốt!',
-          details,
+          id: 999999,
+          title: '🔔 Kiểm tra thông báo CareLens',
+          body: 'Hệ thống thông báo CareLens đang hoạt động tốt!',
+          notificationDetails: details,
           payload: 'test_notification',
         );
       }
@@ -477,7 +479,13 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _plugin.show(id, title, body, details, payload: payload);
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: payload,
+    );
   }
 
   // ─── Trợ giúp phân tích giờ uống (Schedule Time Parser) ────────────────

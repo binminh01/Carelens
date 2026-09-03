@@ -504,13 +504,17 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(icon, color: AppColors.accentGreen, size: 22),
         const SizedBox(width: 10),
-        Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
       ],

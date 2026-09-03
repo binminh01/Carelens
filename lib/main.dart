@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
+import 'core/services/gemini_service.dart';
 import 'core/services/isar_service.dart';
 import 'core/services/notification_service.dart';
 
@@ -32,6 +33,12 @@ Future<void> main() async {
 
   // 2. Khởi tạo cơ sở dữ liệu Isar Offline và nạp dữ liệu mẫu
   await IsarService.instance.initialize();
+
+  // 3. Nạp biến môi trường (.env) — phải trước khi dùng geminiApiKeys
+  await dotenv.load(fileName: '.env');
+
+  // 4. Khởi tạo Gemini AI Service (đọc key từ .env)
+  GeminiService.instance.initialize();
 
   // Khởi động ứng dụng trực tiếp
   runApp(

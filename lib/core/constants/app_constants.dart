@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Hằng số toàn ứng dụng CareLens
 class AppConstants {
   AppConstants._();
@@ -16,12 +18,15 @@ class AppConstants {
 
   /// Danh sách các API Key dự phòng từ Google AI Studio (Phải bắt đầu bằng AIzaSy...)
   static List<String> get geminiApiKeys => [
-    dotenv.env['GEMINI_KEY_1'] ?? '',
-    dotenv.env['GEMINI_KEY_2'] ?? '',
-    dotenv.env['GEMINI_KEY_3'] ?? '',
-    dotenv.env['GEMINI_KEY_4'] ?? '',
-    dotenv.env['GEMINI_KEY_5'] ?? '',
-  ].where((key) => key.isNotEmpty).toList();
+        dotenv.env['GEMINI_KEY_1'] ?? '',
+        dotenv.env['GEMINI_KEY_2'] ?? '',
+        dotenv.env['GEMINI_KEY_3'] ?? '',
+        dotenv.env['GEMINI_KEY_4'] ?? '',
+        dotenv.env['GEMINI_KEY_5'] ?? '',
+      ]
+          .where((key) => key.isNotEmpty)
+          .cast<String>() // Ép kiểu chính xác sang String
+          .toList();
 
   static const int imageQuality = 85;
   static const String dateFormat = 'dd/MM/yyyy';

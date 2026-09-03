@@ -128,9 +128,20 @@ class GeminiService {
   }
 
   Future<T> _executeWithRetry<T>(Future<T> Function() apiCall) async {
+    // Lazy init: if not yet initialized (e.g., called before main() finishes),
+    // attempt to initialize now so the user never sees NotInitializedError.
+    if (_model == null) {
+      developer.log(
+        'GeminiService: lazy initialize() triggered inside _executeWithRetry.',
+        name: 'GeminiService',
+      );
+      initialize();
+    }
     _assertInitialized();
+
     int attempts = 0;
-    final maxAttempts = AppConstants.geminiApiKeys.length;
+    final maxAttempts =
+        AppConstants.geminiApiKeys.isEmpty ? 1 : AppConstants.geminiApiKeys.length;
 
     while (attempts < maxAttempts) {
       try {
@@ -174,6 +185,15 @@ class GeminiService {
 
   Future<List<ParsedPrescription>> analyzePrescriptionImage(
       Uint8List imageBytes) async {
+    // Defensive lazy init: ensure the model is ready before any network call.
+    if (!isInitialized) {
+      developer.log(
+        'GeminiService.analyzePrescriptionImage: model not ready, calling initialize().',
+        name: 'GeminiService',
+      );
+      initialize();
+    }
+
     final mealTimes = await _getMealTimes();
     final breakfast = mealTimes['breakfast']!;
     final lunch = mealTimes['lunch']!;

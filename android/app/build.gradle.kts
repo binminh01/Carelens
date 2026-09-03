@@ -43,12 +43,20 @@ kotlin {
     }
 }
 
+// Pin the Java toolchain to JDK 17 so Gradle always compiles with the
+// correct JDK regardless of which JVM launched the daemon.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 flutter {
     source = "../.."
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     
     // Thêm dependency xử lý lỗi CallbackToFutureAdapter
     implementation("androidx.concurrent:concurrent-futures:1.2.0")

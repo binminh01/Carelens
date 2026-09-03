@@ -29,6 +29,18 @@ subprojects {
         sourceCompatibility = "17"
         targetCompatibility = "17"
     }
+
+    // Pin the Java toolchain to JDK 17 for every Android plugin subproject
+    // (flutter_timezone, camera_android_camerax, etc.) so the daemon JDK and
+    // the compiler target never diverge.
+    plugins.withId("com.android.library") {
+        extensions.configure<com.android.build.gradle.LibraryExtension> {
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+        }
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
